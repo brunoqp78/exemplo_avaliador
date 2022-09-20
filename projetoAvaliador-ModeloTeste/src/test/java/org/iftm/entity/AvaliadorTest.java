@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
 public class AvaliadorTest {
 	private Usuario usuario1;
 	private Usuario usuario2;
@@ -27,8 +29,9 @@ public class AvaliadorTest {
 		avaliador = new Avaliador();
 	}
 
+	// Testes da Versão 1: encontrar o maior lance
 	@Test
-	public void testarBuscaMaiorLanceSemOrdem() {
+	public void testarBuscaMaiorLanceSemOrdem() throws Exception {
 		// Entradas : criar os lances e o resultado esperado
 		Lance lance1 = new Lance(usuario1, 300);
 		Lance lance2 = new Lance(usuario2, 400.0000001);
@@ -36,7 +39,7 @@ public class AvaliadorTest {
 		leilao.propoe(lance1);
 		leilao.propoe(lance2);
 		leilao.propoe(lance3);
-		
+
 		double resultadoEsperado = 400;
 
 		// execução
@@ -50,7 +53,7 @@ public class AvaliadorTest {
 	}
 
 	@Test
-	public void testarBuscaMaiorLanceComOrdem() {
+	public void testarBuscaMaiorLanceComOrdemCrescente() throws Exception {
 //Entradas : criar os lances e o resultado esperado
 		Lance lance1 = new Lance(usuario1, 300);
 		Lance lance2 = new Lance(usuario2, 400.0000001);
@@ -58,7 +61,7 @@ public class AvaliadorTest {
 		leilao.propoe(lance3);
 		leilao.propoe(lance1);
 		leilao.propoe(lance2);
-		
+
 		double resultadoEsperado = 400;
 
 //execução 
@@ -68,49 +71,145 @@ public class AvaliadorTest {
 //comparação
 		// assertEquals(resultadoEsperado, resultadoObtido);
 		assertEquals(resultadoEsperado, resultadoObtido, 0.0001);
+	}
+
+	@Test
+	public void testarBuscaMenorLanceSemOrdem() throws Exception {
+		// Entradas : criar os lances e o resultado esperado
+		Lance lance1 = new Lance(usuario1, 300);
+		Lance lance2 = new Lance(usuario2, 400.0000001);
+		Lance lance3 = new Lance(usuario3, 250);
+		leilao.propoe(lance1);
+		leilao.propoe(lance2);
+		leilao.propoe(lance3);
+
+		double resultadoEsperado = 250;
+
+		// execução
+		avaliador.avalia(leilao);
+		double resultadoObtido = avaliador.getMenorLance();
+
+		// comparação
+		// Assertions.assertEquals(resultadoEsperado, resultadoObtido);
+		assertEquals(resultadoEsperado, resultadoObtido, 0.0001);
+
+	}
+
+	@Test
+	public void testarBuscaMenorLanceComOrdemCrescente() throws Exception {
+//Entradas : criar os lances e o resultado esperado
+		Lance lance1 = new Lance(usuario1, 300);
+		Lance lance2 = new Lance(usuario2, 400.0000001);
+		Lance lance3 = new Lance(usuario3, 250);
+		leilao.propoe(lance3);
+		leilao.propoe(lance1);
+		leilao.propoe(lance2);
+
+		double resultadoEsperado = 250;
+
+//execução 
+		avaliador.avalia(leilao);
+		double resultadoObtido = avaliador.getMenorLance();
+
+//comparação
+		// assertEquals(resultadoEsperado, resultadoObtido);
+		assertEquals(resultadoEsperado, resultadoObtido, 0.0001);
+	}
+
+	/**
+	 * Testar se o método avalia consegue identificar o maior lance quando há apenas
+	 * um lance
+	 * @throws Exception 
+	 */
+	@Test
+	public void testarBuscaMenorLanceComUmLance() throws Exception {
+		// Entradas : criar os lances e o resultado esperado
+		Lance lance1 = new Lance(usuario1, 300);
+		leilao.propoe(lance1);
+
+		double resultadoEsperado = 300;
+
+		// execução
+		avaliador.avalia(leilao);
+		double resultadoObtido = avaliador.getMenorLance();
+
+		// comparação
+		assertEquals(resultadoEsperado, resultadoObtido, 0.0001);
+
+	}
+
+	/**
+	 * Teste que verifica se o Avaliador retorna erro quando não há lance.
+	 * @throws Exception 
+	 */
+	@Test
+	public void testarBuscaMaiorLanceSemLance(){
+		Assertions.assertThrows(
+				Exception.class, 
+				()->{
+					avaliador.avalia(leilao);
+					});
 	}
 	
+	// Testes da Versão 2: encontrar os 3 maiores lances(um conjunto de lances)
 	@Test
-	public void testarBuscaMenorLanceSemOrdem() {
+	public void testarBuscaTresMaioresLancesComApenasUmLance() throws Exception {
 		// Entradas : criar os lances e o resultado esperado
 		Lance lance1 = new Lance(usuario1, 300);
 		Lance lance2 = new Lance(usuario2, 400.0000001);
 		Lance lance3 = new Lance(usuario3, 250);
+		Lance lance4 = new Lance(usuario4, 750);
+		Lance lance5 = new Lance(usuario1, 650);
+		Lance lance6 = new Lance(usuario3, 550);
+		leilao.propoe(lance3);
 		leilao.propoe(lance1);
 		leilao.propoe(lance2);
-		leilao.propoe(lance3);
-		
-		double resultadoEsperado = 250;
-
-		// execução
+		leilao.propoe(lance6);
+		leilao.propoe(lance5);
+		leilao.propoe(lance4);
+		//resultados esperados
+		int numeroLancesEsperados = 3;
+		double valorPrimeiroLanceEsperado = 750;
+		double valorSegundoLanceEsperado = 650;
+		double valorTerceiroLanceEsperado = 550;
+		//executar
 		avaliador.avalia(leilao);
-		double resultadoObtido = avaliador.getMenorLance();
-
-		// comparação
-		// Assertions.assertEquals(resultadoEsperado, resultadoObtido);
-		assertEquals(resultadoEsperado, resultadoObtido, 0.0001);
-
+		List<Lance> maiores = avaliador.getTresMaiores();
+		int numeroLancesObtidos = maiores.size();
+		double valorPrimeiroLanceObtido = maiores.get(0).getValor();
+		double valorSegundoLanceObtido = maiores.get(1).getValor();
+		double valorTerceiroLanceObtido = maiores.get(2).getValor();	
+		
+		//comparar resultados
+		assertEquals(numeroLancesEsperados, numeroLancesObtidos);
+		assertEquals(valorPrimeiroLanceEsperado, valorPrimeiroLanceObtido, 0.0000001);
+		assertEquals(valorSegundoLanceEsperado, valorSegundoLanceObtido, 0.0000001);
+		assertEquals(valorTerceiroLanceEsperado, valorTerceiroLanceObtido, 0.0000001);
+		assertEquals(lance4, maiores.get(0));
+		assertEquals(lance5, maiores.get(1));
+		assertEquals(lance6, maiores.get(2));
 	}
 
+	// Testes da Versão 2: encontrar os 3 maiores lances(um conjunto de lances)
 	@Test
-	public void testarBuscaMenorLanceComOrdem() {
-//Entradas : criar os lances e o resultado esperado
+	public void testarBuscaTresMaioresLancesComOrdemCrescente() throws Exception {
+		// Entradas : criar os lances e o resultado esperado
 		Lance lance1 = new Lance(usuario1, 300);
-		Lance lance2 = new Lance(usuario2, 400.0000001);
-		Lance lance3 = new Lance(usuario3, 250);
-		leilao.propoe(lance3);
 		leilao.propoe(lance1);
-		leilao.propoe(lance2);
-		
-		double resultadoEsperado = 250;
-
-//execução 
+		//resultados esperados
+		int numeroLancesEsperados = 1;
+		double valorPrimeiroLanceEsperado = 300;
+		//executar
 		avaliador.avalia(leilao);
-		double resultadoObtido = avaliador.getMenorLance();
-
-//comparação
-		// assertEquals(resultadoEsperado, resultadoObtido);
-		assertEquals(resultadoEsperado, resultadoObtido, 0.0001);
-	}	
-
+		List<Lance> maiores = avaliador.getTresMaiores();
+		int numeroLancesObtidos = maiores.size();
+		double valorPrimeiroLanceObtido = maiores.get(0).getValor();
+		
+		//comparar resultados
+		assertEquals(numeroLancesEsperados, numeroLancesObtidos);
+		assertEquals(valorPrimeiroLanceEsperado, valorPrimeiroLanceObtido, 0.0000001);
+		assertEquals(lance1, maiores.get(0));
+	}
+	
+	
 }
