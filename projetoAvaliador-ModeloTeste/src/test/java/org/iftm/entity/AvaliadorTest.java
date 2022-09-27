@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.Duration;
 import java.util.List;
 
 public class AvaliadorTest {
@@ -182,9 +183,9 @@ public class AvaliadorTest {
 		
 		//comparar resultados
 		assertEquals(numeroLancesEsperados, numeroLancesObtidos);
-		assertEquals(valorPrimeiroLanceEsperado, valorPrimeiroLanceObtido, 0.0000001);
-		assertEquals(valorSegundoLanceEsperado, valorSegundoLanceObtido, 0.0000001);
-		assertEquals(valorTerceiroLanceEsperado, valorTerceiroLanceObtido, 0.0000001);
+		assertEquals(valorPrimeiroLanceEsperado, valorPrimeiroLanceObtido, 0.0000001, "O maior lance não corresponde ao resultado obtido!!");
+		assertEquals(valorSegundoLanceEsperado, valorSegundoLanceObtido, 0.0000001, "O segundo maior lance não corresponde ao resultado obtido!!");
+		assertEquals(valorTerceiroLanceEsperado, valorTerceiroLanceObtido, 0.0000001, "O terceiro maior lance não corresponde ao resultado obtido!!");
 		assertEquals(lance4, maiores.get(0));
 		assertEquals(lance5, maiores.get(1));
 		assertEquals(lance6, maiores.get(2));
@@ -209,6 +210,19 @@ public class AvaliadorTest {
 		assertEquals(numeroLancesEsperados, numeroLancesObtidos);
 		assertEquals(valorPrimeiroLanceEsperado, valorPrimeiroLanceObtido, 0.0000001);
 		assertEquals(lance1, maiores.get(0));
+	}
+	
+	@Test
+	public void testarAvaliadorAvaliaCemMilLancesEmUmMilesegundo() {
+		for(int i=0; i<100000; i++) {
+			leilao.propoe(new Lance(usuario1, i));
+		}
+		Assertions.assertTimeout(
+				Duration.ofMillis(1), 
+				()->{
+					avaliador.avalia(leilao);
+				}
+		);
 	}
 	
 	
